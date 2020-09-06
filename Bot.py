@@ -25,20 +25,61 @@ async def purge(ctx, limit: int = 100):
     await ctx.channel.purge(limit=limit)
 
 
+#   Role Commands
+
 @bot.command(name="add_role",
              help="First argument is the role name which is mandatory, second one is an optional colour if not provided is white.")
 @commands.has_role("admin")
-async def edit_role(ctx, name, color="#FFFFFF"):
-    if (name):
-        try:
-            col = color.replace("#", "0x")
-            col = int(col, 16)
-            await ctx.guild.create_role(name=name, color=discord.Colour(col))
-            await ctx.send(f"Create a role with the name: {name}, and color {color}")
-        except ValueError:
-            await ctx.send("Wrong colour format, use hex code.")
-    else:
-        await ctx.send("No name was provided")
+async def add_role(ctx, name=None, color="#000000"):
+    if name is None:
+        await ctx.send("Name was not specified")
+        raise ValueError("Name was not provided")
+    try:
+        col = color.replace("#", "0x")
+        col = int(col, 16)
+        await ctx.guild.create_role(name=name, color=discord.Colour(col))
+        await ctx.send(f"Create a role with the name: {name}, and color {color}")
+    except ValueError:
+        await ctx.send("Color code format bad.")
+
+
+@bot.command(name="delete_role", help="Delete a role specified by name")
+@commands.has_role("admin")
+async def delete_role(ctx, role: discord.Role):
+    if role is None:
+        await ctx.send("Please specify a role name")
+    try:
+        await role.delete()
+        await ctx.send(f'{role} has been deleted.')
+    except discord.Forbidden:
+        await ctx.send('Permission error')
+
+
+@bot.command(name="assign_role", help="Assign yourself a role")
+@commands.has_role("admin")
+async def assign_role(ctx, role):
+    try:
+        role = discord.utils.get(ctx.guild.roles, name=role)
+        await discord.Member.add_roles(ctx.author, role)
+    except:
+        await ctx.send("The role doesn't exist")
+
+@bot.command(name="remove_role", help="Remove a role that you specify")
+async def assign_role(ctx, role):
+    try:
+        role = discord.utils.get(ctx.guild.roles, name=role)
+        await discord.Member.remove_roles(ctx.author, role)
+    except:
+        await ctx.send("The role doesn't exist")
+
+
+@bot.command(name="roles", help="Show all available roles")
+async def roles(ctx):
+    roles = []
+    for r in ctx.guild.roles:
+        if r.name != "@everyone":
+            roles.append(r.name)
+    await ctx.send(roles)
 
 
 bot.run(TOKEN)
