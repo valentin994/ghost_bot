@@ -24,11 +24,21 @@ async def ping(ctx):
 async def purge(ctx, limit: int = 100):
     await ctx.channel.purge(limit=limit)
 
-@bot.command(name="add_role")
-@commands.has_role("admin")
-async def edit_role(ctx):
-    await ctx.guild.create_role(name="abc")
 
+@bot.command(name="add_role",
+             help="First argument is the role name which is mandatory, second one is an optional colour if not provided is white.")
+@commands.has_role("admin")
+async def edit_role(ctx, name, color="#FFFFFF"):
+    if (name):
+        try:
+            col = color.replace("#", "0x")
+            col = int(col, 16)
+            await ctx.guild.create_role(name=name, color=discord.Colour(col))
+            await ctx.send(f"Create a role with the name: {name}, and color {color}")
+        except ValueError:
+            await ctx.send("Wrong colour format, use hex code.")
+    else:
+        await ctx.send("No name was provided")
 
 
 bot.run(TOKEN)
