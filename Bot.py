@@ -19,11 +19,38 @@ async def ping(ctx):
     await ctx.send(f'pong <@{ctx.author.id}>')
 
 
+#   General moderation
+
+@bot.command(name="kick", help="Kick user")
+@commands.has_role("admin")
+async def kick(ctx, target: discord.Member, reason=None):
+    await target.kick(reason=reason)
+    await ctx.send(f"There is no user by the name {target}")
+
+@kick.error
+async def kick_error(ctx, error):
+    if isinstance(error, commands.BadArgument):
+        await ctx.send("Could not find that user")
+
+
 @bot.command(name="purge", help="Delete messages in the channel, if no number is specified 100 msgs will be deleted.")
 @commands.has_role("admin")
 async def purge(ctx, limit: int = 100):
     await ctx.channel.purge(limit=limit)
 
+
+@bot.command(name="ban", help="Ban user")
+@commands.has_role("admin")
+async def ban(ctx, target: discord.Member, reason=None):
+    if ctx.author.id:
+        await ctx.send("You can't ban yourself")
+        return
+    await target.ban(reason)
+
+@ban.error
+async def ban_error(ctx, error):
+    if isinstance(error, commands.BadArgument):
+        await ctx.send("Could not find that user")
 
 #   Role Commands
 
@@ -63,6 +90,7 @@ async def assign_role(ctx, role):
         await discord.Member.add_roles(ctx.author, role)
     except:
         await ctx.send("The role doesn't exist")
+
 
 @bot.command(name="remove_role", help="Remove a role that you specify")
 async def assign_role(ctx, role):
