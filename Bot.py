@@ -7,7 +7,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='!')
-
+counter = 0
 
 @bot.event
 async def on_ready():
@@ -17,6 +17,18 @@ async def on_ready():
 @bot.command(name="ping")
 async def ping(ctx):
     await ctx.send(f'pong <@{ctx.author.id}>')
+
+# Channels
+
+@bot.command(name="create_channel", help="Create a channel with the specified name")
+@commands.has_role("admin")
+async def create_channel(ctx, channel_name):
+    await ctx.message.guild.create_text_channel(channel_name)
+
+@bot.command(name="delete_channel", help="Delete a channel with the specified name")
+@commands.has_role("admin")
+async def create_channel(ctx, channel_name: discord.TextChannel):
+    await channel_name.delete()
 
 
 #   General moderation
