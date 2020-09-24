@@ -7,7 +7,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='!')
-counter = 0
+
 
 @bot.event
 async def on_ready():
@@ -69,17 +69,18 @@ async def ban_error(ctx, error):
 @bot.command(name="add_role",
              help="First argument is the role name which is mandatory, second one is an optional colour if not provided is white.")
 @commands.has_role("admin")
-async def add_role(ctx, name=None, color="#000000"):
-    if name is None:
-        await ctx.send("Name was not specified")
-        raise ValueError("Name was not provided")
-    try:
-        col = color.replace("#", "0x")
-        col = int(col, 16)
-        await ctx.guild.create_role(name=name, color=discord.Colour(col))
-        await ctx.send(f"Create a role with the name: {name}, and color {color}")
-    except ValueError:
-        await ctx.send("Color code format bad.")
+async def add_role(ctx, name, color="#000000"):
+    col = color.replace("#", "0x")
+    col = int(col, 16)
+    await ctx.guild.create_role(name=name, color=discord.Colour(col))
+    await ctx.send(f"Create a role with the name: {name}, and color {color}")
+
+@add_role.error
+async def add_role_error(ctx, error):
+    if isinstance(error, commands.CommandInvokeError):
+        await ctx.send("Check your colour code")
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("Please specify a name")
 
 
 @bot.command(name="delete_role", help="Delete a role specified by name")
@@ -92,6 +93,7 @@ async def delete_role(ctx, role: discord.Role):
         await ctx.send(f'{role} has been deleted.')
     except discord.Forbidden:
         await ctx.send('Permission error')
+
 
 
 @bot.command(name="assign_role", help="Assign yourself a role")
